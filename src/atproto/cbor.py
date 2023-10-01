@@ -24,7 +24,8 @@ def decode_head(stream):
         byte_value = stream.read(byte_lengths[additional_info])
         if major_type == MajorType.NEGATIVE_INT:
             return major_type, -1 - int.from_bytes(byte_value, 'big')
-        return major_type, int.from_bytes(byte_value, 'big')
+        else:
+            return major_type, int.from_bytes(byte_value, 'big')
 
 def decode_body(stream):
     major_type, info = decode_head(stream)
