@@ -71,3 +71,35 @@ class TestCBOR(unittest.TestCase):
         with self.assertRaises(EOFError):
             bs = BytesIO(bytes.fromhex('58 80'))
             decode_body(bs)
+
+    def test_decode_head_text_string(self):
+        test_table = [
+            ('60', 0),
+            ('6161', 1),
+            ('6449455446', 4),
+            ('62225c', 2),
+            ('62c3bc', 2),
+            ('63e6b0b4', 3),
+            ('64f0908591', 4),
+        ]
+        for hex_input, expected in test_table:
+            dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(dh, (MajorType.TEXT_STRING, expected))
+
+    def test_decode_body_text_string(self):
+        test_table = [
+            ('60', ''),
+            ('61 61', 'a'),
+            ('6449455446', 'IETF'),
+            ('62225c', "\"\\"),
+            ('62c3bc', '\u00fc'),
+            ('63e6b0b4', '\u6c34'),
+            ('64f0908591', '\U00010151'),
+        ]
+        for hex_input, expected in test_table:
+            db = decode_body(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(db, expected)
+
+        with self.assertRaises(EOFError):
+            bs = BytesIO(bytes.fromhex('61'))
+            decode_body(bs)

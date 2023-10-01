@@ -4,6 +4,7 @@ class MajorType(Enum):
     UNSIGNED_INT = 0
     NEGATIVE_INT = 1
     BYTE_STRING = 2
+    TEXT_STRING = 3
 
 def decode_head(stream):
     (stream_head,) = stream.read(1)
@@ -29,8 +30,12 @@ def decode_body(stream):
     if major_type in {MajorType.UNSIGNED_INT, MajorType.NEGATIVE_INT}:
         return info
 
-    elif major_type == MajorType.BYTE_STRING:
+    elif major_type in {MajorType.BYTE_STRING, MajorType.TEXT_STRING}:
         value = stream.read(info)
         if len(value) != info:
             raise EOFError()
-        return value
+
+        if major_type == MajorType.BYTE_STRING:
+            return value
+        elif major_type == MajorType.TEXT_STRING:
+            return value.decode('utf-8')
