@@ -3,6 +3,7 @@ from io import BytesIO
 from atproto.cbor import (
     decode_head,
     decode_body,
+    decode_varint,
     MajorType,
     CID_TAG
 )
@@ -123,3 +124,7 @@ class TestCBOR(unittest.TestCase):
 
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
+
+    def test_decode_varint(self):
+        bs = BytesIO(bytes.fromhex('E5AD04'))
+        self.assertEqual(decode_varint(bs), 71_397)

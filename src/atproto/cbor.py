@@ -74,3 +74,13 @@ def decode_body(stream):
         assert(len(cid_bytes) == 37), 'invalid CID byte length found'
         assert(cid_bytes.startswith(b'\x00\x01\x71\x12\x20')), 'malformed CID found' # Multibase Identity, CIDv1, DAG-CBOR, SHA256
         return 'b' + b32encode(cid_bytes[1:]).decode().lower().rstrip('=')
+
+def decode_varint(stream):
+    n = 0
+    shift = 0
+    while True:
+        (val,) = stream.read(1)
+        n |= (val & 0b0111_1111) << shift
+        if val & 0b1000_0000 == 0:
+            return n
+        shift += 7
