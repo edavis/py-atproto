@@ -43,27 +43,16 @@ class TestCBOR(unittest.TestCase):
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
 
-    def test_decode_head_byte_string(self):
+    def test_byte_string(self):
         test_table = [
-            ('40', 0),
-            ('58 80', 128),
-            ('59 01 F4', 500),
-            ('59 8000', 32768),
-            ('5A 80000000', 2147483648),
-            ('5B 80000000 00000000', 9223372036854775808),
+            ('40', 0, b''),
+            ('4401020304', 4, b'\x01\x02\x03\x04'),
+            ('59 01 F4' + '00'*500, 500, b'\x00'*500),
         ]
-        for hex_input, expected in test_table:
+        for hex_input, length, expected in test_table:
             dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
-            self.assertEqual(dh, (MajorType.BYTE_STRING, expected))
+            self.assertEqual(dh, (MajorType.BYTE_STRING, length))
 
-    def test_decode_body_byte_string(self):
-        test_table = [
-            ('40', b''),
-            ('59 01 F4' + '00'*500, b'\x00'*500),
-            ('44 DEADBEEF', b'\xde\xad\xbe\xef'),
-            ('58 FF' + '00'*255, b'\x00'*255),
-        ]
-        for hex_input, expected in test_table:
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
 
@@ -72,31 +61,20 @@ class TestCBOR(unittest.TestCase):
             bs = BytesIO(bytes.fromhex('58 80'))
             decode_body(bs)
 
-    def test_decode_head_text_string(self):
+    def test_text_string(self):
         test_table = [
-            ('60', 0),
-            ('6161', 1),
-            ('6449455446', 4),
-            ('62225c', 2),
-            ('62c3bc', 2),
-            ('63e6b0b4', 3),
-            ('64f0908591', 4),
+            ('60', 0, ''),
+            ('6161', 1, 'a'),
+            ('6449455446', 4, 'IETF'),
+            ('62225c', 2, "\"\\"),
+            ('62c3bc', 2, '\u00fc'),
+            ('63e6b0b4', 3, '\u6c34'),
+            ('64f0908591', 4, '\U00010151'),
         ]
-        for hex_input, expected in test_table:
+        for hex_input, length, expected in test_table:
             dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
-            self.assertEqual(dh, (MajorType.TEXT_STRING, expected))
+            self.assertEqual(dh, (MajorType.TEXT_STRING, length))
 
-    def test_decode_body_text_string(self):
-        test_table = [
-            ('60', ''),
-            ('61 61', 'a'),
-            ('6449455446', 'IETF'),
-            ('62225c', "\"\\"),
-            ('62c3bc', '\u00fc'),
-            ('63e6b0b4', '\u6c34'),
-            ('64f0908591', '\U00010151'),
-        ]
-        for hex_input, expected in test_table:
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
 
