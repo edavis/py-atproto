@@ -1,4 +1,7 @@
+from base64 import b32encode
 from enum import Enum
+
+CID_TAG = 42
 
 class MajorType(Enum):
     UNSIGNED_INT = 0
@@ -7,6 +10,7 @@ class MajorType(Enum):
     TEXT_STRING = 3
     ARRAY = 4
     MAP = 5
+    TAG = 6
 
 def decode_head(stream):
     (stream_head,) = stream.read(1)
@@ -56,3 +60,11 @@ def decode_body(stream):
             value = decode_body(stream)
             values.update({key: value})
         return values
+
+    elif major_type == MajorType.TAG:
+        assert(info == CID_TAG), 'only CID (42) tags are supported'
+        cid_bytes = decode_body(stream)
+        assert(type(cid_bytes) is bytes), 'CID is not a byte string'
+        assert(len(cid_bytes) == 37), 'invalid CID byte length found'
+        assert(cid_bytes.startswith(b'\x00\x01\x71\x12\x20')), 'malformed CID found' # Multibase Identity, CIDv1, DAG-CBOR, SHA256
+        return 'b' + b32encode(cid_bytes[1:]).decode().lower().rstrip('=')

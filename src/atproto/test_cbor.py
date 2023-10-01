@@ -3,7 +3,8 @@ from io import BytesIO
 from atproto.cbor import (
     decode_head,
     decode_body,
-    MajorType
+    MajorType,
+    CID_TAG
 )
 
 class TestCBOR(unittest.TestCase):
@@ -107,6 +108,18 @@ class TestCBOR(unittest.TestCase):
         for hex_input, length, expected in test_table:
             dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(dh, (MajorType.MAP, length))
+
+            db = decode_body(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(db, expected)
+
+    def test_tag(self):
+        test_table = [
+            ('d82a5825000171122069ea0740f9807a28f4d932c62e7c1c83be055e55072c90266ab3e79df63a365b', 'bafyreidj5idub6mapiupjwjsyyxhyhedxycv4vihfsicm2vt46o7morwlm'),
+            ('d82a5825000171122089556551c3926679cc52c72e182a5619056a4727409ee93a26d05ad727ca11f4', 'bafyreiejkvsvdq4smz44yuwhfymcuvqzavveoj2at3utujwqlllspsqr6q'),
+        ]
+        for hex_input, expected in test_table:
+            dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(dh, (MajorType.TAG, CID_TAG))
 
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
