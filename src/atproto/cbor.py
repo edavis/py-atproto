@@ -1,5 +1,8 @@
-# A modified version of `bsky_firehose_standalone.py`
-# Refs: <https://gist.github.com/DavidBuchanan314/972266864b54fc9343148b47ed5ee2c2>
+"""
+A DAG-CBOR parser for the Authenticated Transfer Protocol (atproto)
+"""
+
+# h/t https://gist.github.com/DavidBuchanan314/972266864b54fc9343148b47ed5ee2c2
 
 from base64 import b32encode
 from enum import Enum
