@@ -9,11 +9,17 @@ from atproto.cbor import (
 class TestCBOR(unittest.TestCase):
     def test_unsigned_int(self):
         test_table = [
-            ('0A', 10),
-            ('18 80', 128),
-            ('19 01F4', 500),
-            ('1A 80000000', 2147483648),
-            ('1B 80000000 00000000', 9223372036854775808),
+            ('00', 0),
+            ('01', 1),
+            ('0a', 10),
+            ('17', 23),
+            ('1818', 24),
+            ('1819', 25),
+            ('1864', 100),
+            ('1903e8', 1000),
+            ('1a000f4240', 1000000),
+            ('1b000000e8d4a51000', 1000000000000),
+            ('1bffffffffffffffff', 18446744073709551615),
         ]
         for hex_input, expected in test_table:
             dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
@@ -24,11 +30,11 @@ class TestCBOR(unittest.TestCase):
 
     def test_negative_int(self):
         test_table = [
-            ('37', -24),
-            ('38 80', -129),
-            ('39 01F3', -500),
-            ('3A 80000000', -2147483649),
-            ('3B 80000000 00000000', -9223372036854775809),
+            ('20', -1),
+            ('29', -10),
+            ('3863', -100),
+            ('3903e7', -1000),
+            ('3bffffffffffffffff', -18446744073709551616),
         ]
         for hex_input, expected in test_table:
             dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
@@ -41,6 +47,7 @@ class TestCBOR(unittest.TestCase):
         test_table = [
             ('40', 0),
             ('58 80', 128),
+            ('59 01 F4', 500),
             ('59 8000', 32768),
             ('5A 80000000', 2147483648),
             ('5B 80000000 00000000', 9223372036854775808),
@@ -52,6 +59,7 @@ class TestCBOR(unittest.TestCase):
     def test_decode_body_byte_string(self):
         test_table = [
             ('40', b''),
+            ('59 01 F4' + '00'*500, b'\x00'*500),
             ('44 DEADBEEF', b'\xde\xad\xbe\xef'),
             ('58 FF' + '00'*255, b'\x00'*255),
         ]
