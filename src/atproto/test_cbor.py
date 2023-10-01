@@ -81,3 +81,17 @@ class TestCBOR(unittest.TestCase):
         with self.assertRaises(EOFError):
             bs = BytesIO(bytes.fromhex('61'))
             decode_body(bs)
+
+    def test_array(self):
+        test_table = [
+            ('80', 0, []),
+            ('83010203', 3, [1, 2, 3]),
+            ('8301820203820405', 3, [1, [2, 3], [4, 5]]),
+            ('98190102030405060708090a0b0c0d0e 0f101112131415161718181819', 25, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]),
+        ]
+        for hex_input, length, expected in test_table:
+            dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(dh, (MajorType.ARRAY, length))
+
+            db = decode_body(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(db, expected)

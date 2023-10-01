@@ -5,6 +5,7 @@ class MajorType(Enum):
     NEGATIVE_INT = 1
     BYTE_STRING = 2
     TEXT_STRING = 3
+    ARRAY = 4
 
 def decode_head(stream):
     (stream_head,) = stream.read(1)
@@ -39,3 +40,9 @@ def decode_body(stream):
             return value
         elif major_type == MajorType.TEXT_STRING:
             return value.decode('utf-8')
+
+    elif major_type == MajorType.ARRAY:
+        values = []
+        for _ in range(info):
+            values.append(decode_body(stream))
+        return values
