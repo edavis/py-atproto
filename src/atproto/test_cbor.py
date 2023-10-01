@@ -126,5 +126,10 @@ class TestCBOR(unittest.TestCase):
             self.assertEqual(db, expected)
 
     def test_decode_varint(self):
-        bs = BytesIO(bytes.fromhex('E5AD04'))
-        self.assertEqual(decode_varint(bs), 71_397)
+        test_table = [
+            ('E5 AD 04', 71397),
+            ('E5 8E 26', 624485),
+        ]
+        for hex_input, expected in test_table:
+            bs = BytesIO(bytes.fromhex(hex_input))
+            self.assertEqual(decode_varint(bs), expected)
