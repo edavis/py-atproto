@@ -6,6 +6,7 @@ class MajorType(Enum):
     BYTE_STRING = 2
     TEXT_STRING = 3
     ARRAY = 4
+    MAP = 5
 
 def decode_head(stream):
     (stream_head,) = stream.read(1)
@@ -45,4 +46,12 @@ def decode_body(stream):
         values = []
         for _ in range(info):
             values.append(decode_body(stream))
+        return values
+
+    elif major_type == MajorType.MAP:
+        values = {}
+        for _ in range(info):
+            key = decode_body(stream)
+            value = decode_body(stream)
+            values.update({key: value})
         return values

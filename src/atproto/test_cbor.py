@@ -87,11 +87,26 @@ class TestCBOR(unittest.TestCase):
             ('80', 0, []),
             ('83010203', 3, [1, 2, 3]),
             ('8301820203820405', 3, [1, [2, 3], [4, 5]]),
+            ('826161a161626163', 2, ["a", {"b": "c"}]),
             ('98190102030405060708090a0b0c0d0e 0f101112131415161718181819', 25, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]),
         ]
         for hex_input, length, expected in test_table:
             dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(dh, (MajorType.ARRAY, length))
+
+            db = decode_body(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(db, expected)
+
+    def test_map(self):
+        test_table = [
+            ('a0', 0, {}),
+            ('a201020304', 2, {1: 2, 3: 4}),
+            ('a26161016162820203', 2, {"a": 1, "b": [2, 3]}),
+            ('a5616161416162614261636143616461 4461656145', 5, {"a": "A", "b": "B", "c": "C", "d": "D", "e": "E"}),
+        ]
+        for hex_input, length, expected in test_table:
+            dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(dh, (MajorType.MAP, length))
 
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
