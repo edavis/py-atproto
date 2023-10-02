@@ -4,6 +4,8 @@ from atproto.cbor import (
     decode_head,
     decode_body,
     decode_varint,
+    decode_car,
+    encode_cid,
     MajorType,
     CID_TAG
 )
@@ -124,6 +126,26 @@ class TestCBOR(unittest.TestCase):
 
             db = decode_body(BytesIO(bytes.fromhex(hex_input)))
             self.assertEqual(db, expected)
+
+    def test_simple_value(self):
+        test_table = [
+            ('F4', 20, False),
+            ('F5', 21, True),
+            ('F6', 22, None),
+        ]
+        for hex_input, info, expected in test_table:
+            dh = decode_head(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(dh, (MajorType.SIMPLE, info))
+
+            db = decode_body(BytesIO(bytes.fromhex(hex_input)))
+            self.assertEqual(db, expected)
+
+    def test_cid_encode(self):
+        test_table = [
+            ('0171122069ea0740f9807a28f4d932c62e7c1c83be055e55072c90266ab3e79df63a365b', 'bafyreidj5idub6mapiupjwjsyyxhyhedxycv4vihfsicm2vt46o7morwlm'),
+        ]
+        for val, expected in test_table:
+            self.assertEqual(encode_cid(bytes.fromhex(val)), expected)
 
     def test_decode_varint(self):
         test_table = [
